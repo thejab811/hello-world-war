@@ -62,7 +62,7 @@ pipeline {
     stage('Jacoco Result'){
       steps{
         script {
-          cmd_exec('echo "Run the Jacoco result")
+          cmd_exec('echo "Run the Jacoco result"')
           //unstash 'artifacts'
           //jacoco deltaBranchCoverage: '70', deltaClassCoverage: '100', deltaComplexityCoverage: '70', deltaInstructionCoverage: '70', deltaLineCoverage: '70', deltaMethodCoverage: '70', maximumBranchCoverage: '70', maximumClassCoverage: '100', maximumComplexityCoverage: '70', maximumInstructionCoverage: '70', maximumLineCoverage: '70', maximumMethodCoverage: '70'
         }
