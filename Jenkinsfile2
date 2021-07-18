@@ -6,7 +6,7 @@ pipeline {
     }
   }
   triggers {
-    issueCommentTrigger(triggerExpression)
+    cron 'H/1 15 * * * '
   }
   
   options {
