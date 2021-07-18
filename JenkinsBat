@@ -42,9 +42,6 @@ pipeline {
       }
     }
     stage('Sonar-Analysis'){
-      environment {
-        branch = branchname()
-      }
       steps{
         script {
           cmd_exec('echo "To run the sonar scan"')
