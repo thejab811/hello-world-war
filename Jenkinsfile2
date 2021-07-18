@@ -6,24 +6,9 @@ pipeline {
     }
   }
   triggers {
-    //Croon job time setting
-    // pollSCM 'H 15 * * *'
-    // To run the build using the github triggers
     issueCommentTrigger(triggerExpression)
   }
-  environment {
-    GITHUB_TOKEN = credentials('jayasankar-git')
-		//JFROG_URL = 'local.jfrog.com/artifactory'
-		pom = readMavenPom file: "pom.xml"
-		repoPath =  "${pom.groupId.replace("." , "/")}"	    
-		//artifactUrl = "https://${JFROG_URL}/reponame/${repoPath}/${pom.artifactId}/${pom.version}/${pom.artifactId}-${pom.version}.jar"
-		//ARTIFACT_URL= '$artifactUrl'
-		//APP_NAME="${pom.artifactId}-${pom.version}"
-		//url = "https://local.docker.repo.name:port"
-    //registryCredential = 'dockerhub-credentials'
-    //git organisation repo handiling purpose we are using beolw variable
-    repo_name = reponame()
-  }
+  
   options {
     buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '5', daysToKeepStr: '30', numToKeepStr: '5'))
   }
@@ -31,28 +16,10 @@ pipeline {
     stage('Jira-ID Check') {
       steps {
         script {
-          /*if (env.CHANGE_ID) {
-            def prTitle = pullRequest.title
-            def pattern = ~"CIQES-[0-9]{5,7}"
-            println prTitle
-            if(prTitle =~ /CIQES-[0-9]{5,7}/) {
-              status = "success"
-              description = "Title Check passed"
-            } else {
-              status = "error"
-              description = "Not a valid Jira ID"
-              autoCancelled = true
-              error('Aborting the build')
-            }
-            pullRequest.createStatus(status: status,
-                                     context: 'Jira Title Check',
-                                     description: description,
-                                     targetUrl: env.JOB_URL) */
           echo "To check the Jira story ID"
           }
         }
       }
-    }
     stage('Build') {
       steps {
         script {
