@@ -1,0 +1,82 @@
+def cmd_exec(command) {
+    return bat(returnStdout: true, script: "${command}").trim()
+}
+
+pipeline {
+  agent {
+    node{
+      label 'master'
+      customWorkspace "workspace/${env.JOB_NAME}"
+    }
+  }
+  triggers {
+    cron 'H/1 15 * * * '
+  }
+  
+  options {
+    buildDiscarder(logRotator(artifactDaysToKeepStr: '30', artifactNumToKeepStr: '5', daysToKeepStr: '30', numToKeepStr: '5'))
+  }
+  stages {
+    stage('Jira-ID Check') {
+      steps {
+        script {
+          echo "To check the Jira story ID"
+          }
+        }
+      }
+    stage('Build') {
+      steps {
+        script {
+          cmd_exec( "mvn -f pom.xml deploy -U -DbuildNumber=${BUILD_NUMBER} -DskipTests=false")
+          archiveArtifacts artifacts: 'target/*.jar, *.yml'
+          stash includes: 'target/**, *.yml', name: 'artifacts'
+          stash includes: 'target/surefire-reports, target/site/jacoco/jacoco.xml', name: 'jacoco-artifacts'
+          stash includes: '*', name: 'sourceCode'
+        }
+      }
+    }
+    stage('Unit Test') {
+      steps {
+        script {
+          sh 'mvn -f pom.xml test -DskipTests=false'
+        }
+      }
+    }
+    stage('Sonar-Analysis'){
+      environment {
+        branch = branchname()
+      }
+      steps{
+        script {
+          echo "To run the sonar scan"
+         /* unstash 'artifacts'
+          def sonarscanner = libraryResource 'sonarscanner.sh'
+          withSonarQubeEnv('Sonar') {
+            sh sonarscanner
+          } */
+        }
+      }
+    }
+    stage('Jacoco Result'){
+      steps{
+        script {
+          echo "Run the Jacoco result"
+          //unstash 'artifacts'
+          //jacoco deltaBranchCoverage: '70', deltaClassCoverage: '100', deltaComplexityCoverage: '70', deltaInstructionCoverage: '70', deltaLineCoverage: '70', deltaMethodCoverage: '70', maximumBranchCoverage: '70', maximumClassCoverage: '100', maximumComplexityCoverage: '70', maximumInstructionCoverage: '70', maximumLineCoverage: '70', maximumMethodCoverage: '70'
+        }
+      }
+    }
+  }
+  post {
+    always {
+     // cleanWs deleteDirs: true
+      dir("${env.WORKSPACE}@tmp") {
+        deleteDir()
+      }
+      emailext body: "${currentBuild.currentResult}: Job ${env.JOB_NAME} build ${env.BUILD_NUMBER}\n More info at: ${env.BUILD_URL}",
+        recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
+        to: "jayasankar.boddu@gmail.com,${env.BUILD_USER_EMAIL}",
+        subject: "Jenkins Build ${currentBuild.currentResult}: Job ${env.JOB_NAME}"
+    }
+  }
+}
