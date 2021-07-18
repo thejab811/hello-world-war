@@ -160,6 +160,7 @@ pipeline {
           }"""
           server.upload(uploadSpec)
         }
+	}
       } */
     }
   post {
