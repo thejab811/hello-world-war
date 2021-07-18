@@ -30,9 +30,8 @@ pipeline {
       steps {
         script {
           cmd_exec( "mvn -f pom.xml install -DbuildNumber=${BUILD_NUMBER} -DskipTests=false")
-          archiveArtifacts artifacts: 'target/*.jar, *.yml'
-          stash includes: 'target/**, *.yml', name: 'artifacts'
-          stash includes: 'target/surefire-reports, target/site/jacoco/jacoco.xml', name: 'jacoco-artifacts'
+         // archiveArtifacts artifacts: 'target/*.jar, *.yml'
+          stash includes: 'target/**, name: 'artifacts'
           stash includes: '*', name: 'sourceCode'
         }
       }
